@@ -2,7 +2,7 @@ const mongoose = require('mongoose')
 
 const connectDb = async()=>{
     try{
-       mongoose.connect('mongodb://localhost:27017/todolist',{
+       mongoose.connect('mongodb+srv://chabdullah:abdullah21@backend.tr2ys.mongodb.net/?retryWrites=true&w=majority&appName=backend',{
            
         })
         console.log('Database connected successfully')
