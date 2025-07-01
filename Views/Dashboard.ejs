@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <!-- Navigation Bar -->
+    <nav class="bg-blue-700 p-4 flex justify-between items-center mb-8">
+      <div class="flex items-center space-x-4">
+        <span class="text-white text-2xl font-bold">To-Do App</span>
+      </div>
+      <div>
+        <span class="text-blue-100">Welcome, <strong><%= tasks.user%></strong></span>
+        <form action="/api/logout" method="POST" class="inline-block ml-4">
+          <button
+            type="submit"
+            class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
+          >
+            Logout
+          </button>
+        </form>
+      </div>
+    </nav>
+
+    <div
+      class="max-w-4xl py-10 my-20 mx-auto bg-white shadow-lg rounded-lg p-8"
+    >
+      <h1 class="text-3xl font-bold mb-6 text-center text-blue-800">
+        To-Do List Dashboard
+      </h1>
+
+      <!-- Add Task Form -->
+      <form
+        id="todo-form"
+        action="/api/createtask"
+        method="POST"
+        class="flex mb-8 space-x-2"
+      >
+        <input
+          type="text"
+          name="task"
+          placeholder="Enter a new task"
+          required
+          class="flex-1 border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+        />
+        <input
+          type="text"
+          name="description"
+          placeholder="Enter description (optional)"
+          class="flex-1 border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-200"
+        />
+        <button
+          type="submit"
+          class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
+        >
+          Add Task
+        </button>
+      </form>
+
+      <!-- Task List Section -->
+      <section>
+        <h2
+          class="text-2xl font-bold mb-6 text-gray-800 flex items-center gap-2"
+        >
+          <svg
+            class="w-6 h-6 text-blue-500"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M9 12h6m2 0a2 2 0 100-4 2 2 0 000 4zm-8 0a2 2 0 100-4 2 2 0 000 4zm2 8a8 8 0 100-16 8 8 0 000 16z"
+            />
+          </svg>
+          Your Tasks
+        </h2>
+        <ul id="todo-list" class="space-y-4">
+          <% if (tasks.length === 0) { %>
+          <li>
+            <div
+              class="flex flex-col items-center justify-center py-8 bg-gray-50 rounded shadow-inner"
+            >
+              <svg
+                class="w-12 h-12 text-gray-300 mb-2"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.5"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+              </svg>
+              <span class="text-gray-400 text-lg font-medium"
+                >No tasks found</span
+              >
+              <span class="text-gray-400 text-sm"
+                >Start by adding a new task above!</span
+              >
+            </div>
+          </li>
+          <% } %> <% tasks.forEach(elem => { %>
+          <li
+            class="flex items-center justify-between bg-gradient-to-r from-blue-50 to-blue-100 p-4 rounded-lg shadow hover:shadow-md transition group"
+          >
+            <div class="flex items-center gap-4 w-2/4">
+              <form
+                action="/api/status"
+                method="POST"
+                class="flex items-center"
+              >
+                <input type="hidden" name="status" value="Pending" />
+                <input type="checkbox" name="status" value="Completed"
+                class="h-5 w-5 text-blue-600 border-2 border-blue-400 rounded
+                focus:ring-2 focus:ring-blue-300 transition" <%= elem.status ===
+                'Completed' ? 'checked' : '' %> onchange="this.form.submit()"
+                aria-label="Mark as completed" >
+                <input type="hidden" name="taskId" value="<%= elem._id %>" />
+              </form>
+              <div class="flex flex-col">
+                <span
+                  class="text-lg font-semibold text-gray-800 <%= elem.status === 'Completed' ? 'line-through text-gray-400' : '' %>"
+                >
+                  <%= elem.title %>
+                </span>
+                <% if (elem.description) { const words =
+                elem.description.split(/\s+/).slice(0, 10).join(' '); const
+                isTruncated = elem.description.split(/\s+/).length > 10; %>
+                <span class="text-gray-500 text-sm italic mt-1">
+                  <%= words %><%= isTruncated ? '...' : '' %>
+                </span>
+                <% } %>
+                <span class="text-xs text-gray-400 mt-1">
+                  <svg
+                    class="inline w-4 h-4 mr-1 text-gray-300"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.5"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                    />
+                  </svg>
+                  Created: <%= new Date(elem.createdAt).toLocaleDateString() %>
+                </span>
+              </div>
+            </div>
+            <div class="flex items-center gap-2">
+              <button
+                class="edit-btn flex items-center gap-1 bg-green-500 text-white px-4 py-3 rounded-lg hover:bg-green-600 text-xs font-medium shadow transition"
+                data-taskid="<%= elem._id %>"
+                title="Edit Task"
+              >
+                <svg
+                  class="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M15.232 5.232l3.536 3.536M9 13l6-6m2 2l-6 6m-2 2H7v-2l6-6z"
+                  />
+                </svg>
+                Edit
+              </button>
+              <button
+                data-taskid="<%= elem._id %>"
+                class="flex opendetail  detail-btn items-center gap-1 bg-blue-500 text-white px-4 py-3 rounded-lg hover:bg-blue-600 text-xs font-medium shadow transition"
+                title="View Task"
+              >
+                <svg
+                  class="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0zm6 0a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+                View
+              </button>
+              <form action="/api/delect" method="POST"
+              onsubmit="return confirm('Are you sure you want to delete this task?');"
+              
+              >
+                <input type="hidden" name="taskId" value="<%= elem._id %>" />
+                <button
+                  class="flex items-center gap-1 bg-red-500 text-white px-4 py-3 rounded-lg hover:bg-red-600 text-xs font-medium shadow transition"
+                  title="Delete Task"
+                >
+                  <svg
+                    class="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                  Delete
+                </button>
+              </form>
+            </div>
+          </li>
+          <% }) %>
+        </ul>
+      </section>
+
+      <!-- Task Summary -->
+      <div class="mt-8 flex justify-between items-center text-gray-600">
+        <% let totalTasks = tasks.length; let completedTasks = tasks.filter(t =>
+        t.status === 'Completed').length; let pendingTasks = tasks.filter(t =>
+        t.status === 'Pending').length; %>
+        <div>
+          <span class="font-semibold">Total Tasks:</span> <%= totalTasks %>
+        </div>
+        <div>
+          <span class="font-semibold">Completed:</span> <%= completedTasks %>
+        </div>
+        <div>
+          <span class="font-semibold">Pending:</span> <%= pendingTasks %>
+        </div>
+      </div>
+    </div>
+
+    <div
+      class="openedit fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50"
+      style="display: none"
+    >
+      <div class="absolute inset-0 flex items-center justify-center">
+        <div
+          class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md relative flex flex-col items-center justify-center"
+        >
+          <!-- <button class="closeedit absolute top-2 right-2 text-gray-400 hover:text-gray-700 text-2xl font-bold">&times;</button> -->
+          <h2 class="text-lg font-semibold mb-4 text-center">Edit Task</h2>
+          <form
+            id="editTaskForm"
+            action="/api/edittask"
+            method="POST"
+            class="space-y-4 w-full"
+          >
+            <input
+              type="hidden"
+              name="taskId"
+              id="editTaskId"
+              class="edittaskid"
+              value=""
+            />
+            <div>
+              <label
+                for="editTaskTitle"
+                class="block text-sm font-medium text-gray-700"
+                >Task Title</label
+              >
+              <input
+                type="text"
+                name="title"
+                id="editTaskTitle"
+                class="mt-1 block w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                required
+              />
+            </div>
+            <div>
+              <label
+                for="editTaskStatus"
+                class="block text-sm font-medium text-gray-700"
+                >Status</label
+              >
+              <select
+                name="status"
+                id="editTaskStatus"
+                class="mt-1 block w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="Pending">Pending</option>
+                <option value="Completed">Completed</option>
+              </select>
+            </div>
+            <div class="flex justify-end space-x-2">
+              <button
+                type="button"
+                class="closeedit bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+              >
+                Save
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  
+    <!-- Detailed Task View Popup -->
+    <div
+      class="openeditdet fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50"
+      style="display: none"
+    >
+      <div class="absolute inset-0 flex items-center justify-center">
+        <div
+          class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md relative flex flex-col items-center justify-center"
+        >
+          <h2 class="text-lg font-semibold mb-4 text-center">Task Details</h2>
+          <div class="w-full space-y-4">
+            <div>
+              <span class="block text-sm font-medium text-gray-700">Title:</span>
+              <span id="detailTaskTitle" class="block text-lg font-semibold text-gray-800"></span>
+            </div>
+            <div>
+              <span class="block text-sm font-medium text-gray-700">Description:</span>
+              <span id="detailTaskDescription" class="block text-gray-600"></span>
+            </div>
+            <div>
+              <span class="block text-sm font-medium text-gray-700">Status:</span>
+              <span id="detailTaskStatus" class="block text-gray-600"></span>
+            </div>
+            <div>
+              <span class="block text-sm font-medium text-gray-700">Created At:</span>
+              <span id="detailTaskCreated" class="block text-gray-600"></span>
+            </div>
+            <div>
+              <span class="block text-sm font-medium text-gray-700">Last Updated:</span>
+              <span id="detailTaskUpdated" class="block text-gray-600"></span>
+            </div>
+            <div>
+              <span class="block text-sm font-medium text-gray-700">Task ID:</span>
+              <span id="detailTaskId" class="block text-gray-600"></span>
+            </div>
+          </div>
+          <div class="flex justify-end mt-6 space-x-2 w-full">
+            <button
+              type="button"
+              class="edit-btn-detail  bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
+            >
+              Edit
+            </button>
+            <button
+              type="button"
+              class="closeeditdet bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  
+    <script>
+      let openeditdet = document.getElementsByClassName('openeditdet');
+      let closeeditdet = document.getElementsByClassName('closeeditdet');
+      let detailbtn =  document.querySelectorAll('.detail-btn'); 
+      Array.from(closeeditdet).forEach(elm => {
+        elm.addEventListener('click', () => {
+          openeditdet[0].style.display = 'none';
+        });
+      });
+
+      detailbtn.forEach(elm => {
+        elm.addEventListener('click', () => {
+          let taskId = elm.getAttribute('data-taskid');
+          let task = tasks.find(t => t._id === taskId);
+          console.log(task);
+          if (task) {
+            document.getElementById('detailTaskTitle').textContent = task.title;
+            document.getElementById('detailTaskDescription').textContent = task.description || 'No description';
+            document.getElementById('detailTaskStatus').textContent = task.status || 'Pending';
+            document.getElementById('detailTaskCreated').textContent = new Date(task.createdAt).toLocaleString();
+          }
+          openeditdet[0].style.display = 'flex';
+        });
+      });
+
+      let detedit = document.querySelector('.edit-btn-detail');
+      detedit.addEventListener('click', () => {
+          openeditdet[0].style.display = 'none';
+          openedit[0].style.display = 'block';
+      
+      })
+    </script>
+
+  
+    
+    <script>
+         let tasks = <%- JSON.stringify(tasks) %>;
+               let openedit = document.getElementsByClassName('openedit')
+               let closeedit = document.getElementsByClassName('closeedit')
+               let btn = document.querySelectorAll('.edit-btn');
+               Array.from(closeedit).forEach(elm => {
+                elm.addEventListener('click',()=>{
+                    openedit[0].style.display = 'none';
+                })
+               });
+        openedit[0].style.display = 'none';
+
+        detailbtn.forEach(elm =>{
+            elm.addEventListener('click',()=>{
+                let taskId = elm.getAttribute('data-taskid');
+                let task = tasks.find(t => t._id === taskId);
+                console.log(task)
+
+            if (task) {
+                document.getElementById('editTaskId').value = task._id;
+                document.getElementById('editTaskTitle').value = task.title;
+                document.getElementById('editTaskStatus').value = task.status || 'Pending';
+            }
+
+            // openedit[0].style.display = 'block';
+            openeditdet[0].style.display ='block'
+            })
+        })
+      btn.forEach(elm => {
+        elm.addEventListener('click',()=>{
+            // // Simple approach: get taskId from hidden input, fill form, show modal
+            let taskId = elm.getAttribute('data-taskid');
+            let task = tasks.find(t => t._id === taskId);
+
+            if (task) {
+                document.getElementById('editTaskId').value = task._id;
+                document.getElementById('editTaskTitle').value = task.title;
+                document.getElementById('editTaskStatus').value = task.status || 'Pending';
+            }
+
+            openedit[0].style.display = 'block';
+        })
+       });
+       console.log(btn)
+    </script>
+  </body>
+</html>
