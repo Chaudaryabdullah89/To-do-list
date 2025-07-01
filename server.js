@@ -19,6 +19,7 @@ app.set('views', __dirname + '/Views');
 app.get('/', isAuthenticated, async (req, res) => {
     try {
         const tasks = await Task.find({ userId: req.user._id });
+        log.info('Tasks fetched successfully:', tasks);
     
         
         res.render('Dashboard', { title: 'Home Page', tasks });
